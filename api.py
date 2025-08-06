@@ -19,10 +19,10 @@ async def create_synthesis(request: SynthesisRequest):
     This function looks up the deployed Modal function and calls it to generate audio.
     """
     # Look up the remote function from the deployed "vietvoice-tts" Modal app
-    synthesize_function = modal.Function.lookup("vietvoice-tts", "synthesize")
+    synthesize_function = modal.Function.from_name("vietvoice-tts", "synthesize")
     
     # Call the remote function with the provided parameters
-    wav_data = synthesize_function.remote(
+    wav_data = await synthesize_function.remote.aio(
         text=request.text,
         gender=request.gender,
         area=request.area,
