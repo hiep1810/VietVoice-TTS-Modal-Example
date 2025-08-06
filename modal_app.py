@@ -67,20 +67,3 @@ def synthesize(text: str, gender: str = "female", area: str = "northern", emotio
         group=group
     )
     return wav_bytes
-
-# This is the local entrypoint for the application.
-# When you run `modal run modal_app.py`, this function is executed on your
-# local machine. It calls the remote `synthesize` function and saves the
-# resulting audio to a file.
-@app.local_entrypoint()
-def main(text: str, output_file: str = "output.wav"):
-    """
-    Local entrypoint to run the synthesis and save the audio to a file.
-    """
-    print(f"Synthesizing text: '{text}'...")
-    wav_data = synthesize.remote(text)
-    
-    output_path = Path(output_file)
-    with open(output_path, "wb") as f:
-        f.write(wav_data)
-    print(f"✅ Audio saved to {output_path.resolve()}")

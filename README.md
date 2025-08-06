@@ -1,59 +1,75 @@
-# VietVoice-TTS
+# VietVoice-TTS API Server
 
-Dự án này sử dụng [Modal](https://modal.com/) để chạy mô hình chuyển văn bản thành giọng nói (Text-to-Speech) tiếng Việt.
+This project provides a text-to-speech (TTS) API server for Vietnamese, powered by the VietVoice-TTS model and Modal.
 
-## Giới thiệu
+## Features
 
-Đây là một ứng dụng cho phép bạn chuyển đổi văn bản tiếng Việt thành file âm thanh. Ứng dụng được xây dựng để chạy trên nền tảng Modal, giúp tận dụng sức mạnh của GPU để xử lý nhanh chóng mà không cần cài đặt phức tạp trên máy tính cá nhân.
+- High-quality Vietnamese speech synthesis.
+- API server built with FastAPI.
+- GPU-accelerated synthesis using Modal.
 
-## Yêu cầu
+## Prerequisites
 
-*   Cài đặt Modal: `pip install modal`
-*   Tài khoản Modal (đăng ký tại [modal.com](https://modal.com/))
+- Python 3.10 or later
+- Modal account and CLI configured
 
-## Cách sử dụng
+## Installation
 
-1.  **Clone repository này:**
-    ```bash
-    git clone https://github.com/your-username/VietVoice-TTS.git
-    cd VietVoice-TTS
-    ```
+1. **Clone the repository:**
 
-2.  **Chạy ứng dụng:**
+   ```bash
+   git clone https://github.com/hiep1810/VietVoice-TTS-Modal-Example.git
+   cd VietVoice-TTS-Modal-Example
+   ```
 
-    Sử dụng lệnh `modal run` để thực thi. Bạn cần cung cấp văn bản muốn chuyển đổi.
+2. **Install the required packages:**
 
-    ```bash
-    modal run modal_app.py --text "Xin chào Việt Nam"
-    ```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-    File âm thanh sẽ được lưu với tên `output.wav` trong cùng thư mục.
+## Usage
 
-3.  **Tùy chỉnh đầu ra:**
+1. **Deploy the Modal application:**
 
-    Bạn có thể thay đổi tên file đầu ra:
+   This command deploys the `synthesize` function to Modal.
 
-    ```bash
-    modal run modal_app.py --text "Xin chào Việt Nam" --output-file "chao.wav"
-    ```
+   ```bash
+   modal deploy modal_app.py
+   ```
 
-4.  **Tùy chọn giọng nói:**
+2. **Run the local API server:**
 
-    Hàm `synthesize` cho phép tùy chỉnh các tham số sau:
-    *   `gender`: Giới tính (`female` hoặc `male`). Mặc định là `female`.
-    *   `area`: Vùng miền (`northern`, `central`, `southern`). Mặc định là `northern`.
-    *   `emotion`: Cảm xúc (`neutral`, `happy`, `sad`, `angry`). Mặc định là `neutral`.
-    *   `group`: Nhóm giọng đọc (`story`, `news`, `dialog`). Mặc định là `story`.
+   This command starts the local FastAPI server.
 
-    Ví dụ sử dụng giọng nam miền Nam:
-    ```bash
-    # (Lưu ý: Cần sửa đổi file modal_app.py để truyền các tham số này từ CLI)
-    # Ví dụ về cách gọi hàm synthesize trực tiếp trong code:
-    # synthesize.remote("Xin chào", gender="male", area="southern")
-    ```
+   ```bash
+   uvicorn api:web_app --host 0.0.0.0 --port 8000
+   ```
 
-## Cấu trúc dự án
+3. **Send a synthesis request:**
 
-*   `modal_app.py`: File chính của ứng dụng Modal, định nghĩa môi trường, các hàm xử lý và điểm vào.
-*   `requirements.txt`: Chứa các thư viện Python cần thiết.
-*   `vietvoicetts/`: Thư mục chứa mã nguồn của thư viện `vietvoicetts`.
+   You can use the provided `test_api.py` script to send a test request to the API server.
+
+   ```bash
+   python test_api.py
+   ```
+
+   This will send a request to the API server and save the synthesized audio to `output.wav`.
+
+## API Endpoint
+
+### `POST /synthesize`
+
+Synthesizes speech from text.
+
+**Request Body:**
+
+- `text` (str): The text to synthesize.
+- `gender` (str, optional): The gender of the voice. Defaults to `"female"`.
+- `area` (str, optional): The regional accent. Defaults to `"northern"`.
+- `emotion` (str, optional): The emotion of the voice. Defaults to `"neutral"`.
+- `group` (str, optional): The voice group. Defaults to `"story"`.
+
+**Response:**
+
+- `200 OK`: The synthesized audio in WAV format.

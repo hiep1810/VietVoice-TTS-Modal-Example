@@ -1,1 +1,5 @@
 modal
+fastapi
+uvicorn
+python-multipart
+pydantic
