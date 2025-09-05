@@ -1,4 +1,6 @@
+import io
 from fastapi import FastAPI, Response
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import modal
 
@@ -11,6 +13,16 @@ class SynthesisRequest(BaseModel):
     area: str = "northern"
     emotion: str = "neutral"
     group: str = "story"
+
+def audio_response(wav_bytes: bytes):
+    # Inline filename is helpful; length can improve playback reliability
+    headers = {
+        "Content-Disposition": 'inline; filename="tts.wav"',
+        "Content-Length": str(len(wav_bytes)),
+        # Some browsers like having byte serving; if you later add Range support, also set Accept-Ranges
+        # "Accept-Ranges": "bytes",
+    }
+    return StreamingResponse(io.BytesIO(wav_bytes), media_type="audio/wav", headers=headers)
 
 @web_app.post("/synthesize")
 async def create_synthesis(request: SynthesisRequest):
@@ -30,7 +42,7 @@ async def create_synthesis(request: SynthesisRequest):
         group=request.group,
     )
     
-    return Response(content=wav_data, media_type="audio/wav")
+    return audio_response(wav_data)
 
 # To run this local server, you would use a command like:
 # uvicorn api:web_app --reload
