@@ -1,5 +1,8 @@
 import modal
 from pathlib import Path
+import tempfile
+import os
+from vietvoicetts import synthesize
 
 # This is the central object that defines our Modal application.
 app = modal.App("vietvoice-tts")
@@ -66,4 +69,40 @@ def synthesize(text: str, gender: str = "female", area: str = "northern", emotio
         emotion=emotion,
         group=group
     )
+    return wav_bytes
+
+
+@app.function(gpu="L4")
+def clone_voice(text: str, reference_audio_bytes: bytes, reference_text: str) -> bytes:
+    """
+    Synthesizes audio from text using voice cloning.
+    """
+    import tempfile
+    import os
+    
+    try:
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmpfile:
+            tmpfile.write(reference_audio_bytes)
+            tmp_path = tmpfile.name
+
+        # Synthesize the audio
+        duration = synthesize(
+            text,
+            "cloned_voice.wav",
+            reference_audio=tmp_path,
+            reference_text=reference_text
+        )
+
+        # Read the synthesized audio
+        with open("cloned_voice.wav", "rb") as f:
+            wav_bytes = f.read()
+
+    finally:
+        # Delete the temporary file
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+        if os.path.exists("cloned_voice.wav"):
+            os.remove("cloned_voice.wav")
+
     return wav_bytes
